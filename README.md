@@ -1,0 +1,134 @@
+# Notify — recebimento de webhooks do SGE
+
+O Notify é o complemento do [SGE](https://github.com/marcusvgcruz/sge) para
+avisos. O SGE cuida do estoque e, a cada saída registrada, envia um POST para o
+Notify. O Notify guarda o evento no banco e avisa na hora por dois canais:
+WhatsApp (via CallMeBot) e e-mail (SMTP).
+
+## Para quem serve
+
+Para quem usa o SGE e quer saber da venda sem abrir a tela: o dono recebe a
+mensagem no WhatsApp, a administração recebe o e-mail, e o evento fica registrado
+para consulta depois.
+
+## Como funciona
+
+1. O SGE registra uma saída e faz `POST /api/v1/webhooks/order/`.
+2. O Notify grava o evento na tabela `Webhook` (tipo do evento e o JSON recebido).
+3. Calcula o valor da venda (`preço de venda × quantidade`) e o lucro
+   (`valor da venda − custo × quantidade`).
+4. Envia a mensagem de WhatsApp pelo CallMeBot.
+5. Envia o e-mail em HTML para o endereço configurado.
+6. Devolve o payload recebido acrescido de `total_value` e `profit_value`.
+
+## Como rodar
+
+```bash
+git clone https://github.com/marcusvgcruz/notify.git
+cd notify
+
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+cp app/.env.example .env     # edite as variáveis; o .env fica na raiz do projeto
+
+python manage.py migrate
+python manage.py runserver 8001
+```
+
+A porta 8001 é a que o SGE espera na configuração atual. Para usar outra, ajuste
+a URL base em `services/notify.py` do SGE (ou aponte pelo proxy da sua rede).
+
+## Configuração (`.env`)
+
+| Variável | Para que serve |
+| :--- | :--- |
+| `CALLMEBOT_API_URL` | endereço do CallMeBot: `https://api.callmebot.com/whatsapp.php` |
+| `CALLMEBOT_PHONE_NUMBER` | número com DDI e DDD que recebe o WhatsApp |
+| `CALLMEBOT_API_KEY` | chave da API do CallMeBot |
+| `EMAIL_HOST` | servidor SMTP (o exemplo usa `smtp.hostinger.com`) |
+| `EMAIL_PORT` | porta SMTP (587 no exemplo) |
+| `EMAIL_HOST_USER` | conta que envia o e-mail |
+| `EMAIL_HOST_PASSWORD` | senha dessa conta |
+| `EMAIL_ADMIN_RECEIVER` | quem recebe o e-mail de aviso |
+
+`EMAIL_ADMIN_RECEIVER` é obrigatória, mas não está no `.env.example` — inclua a
+linha ao criar o seu `.env`, senão a aplicação não sobe.
+
+## Endpoint
+
+```
+POST /api/v1/webhooks/order/
+```
+
+Exemplo de corpo, no formato que o SGE envia:
+
+```json
+{
+  "event_type": "create_outflow",
+  "timestamp": "2026-11-10 14:32:05",
+  "product": "Camisa Polo M",
+  "product_cost_price": 39.90,
+  "product_selling_price": 89.90,
+  "quantity": 2,
+  "description": "Venda no balcão"
+}
+```
+
+Resposta `200` com o mesmo conteúdo mais os dois totais calculados:
+
+```json
+{
+  "event_type": "create_outflow",
+  "timestamp": "2026-11-10 14:32:05",
+  "product": "Camisa Polo M",
+  "product_cost_price": 39.90,
+  "product_selling_price": 89.90,
+  "quantity": 2,
+  "description": "Venda no balcão",
+  "total_value": 179.8,
+  "profit_value": 100.0
+}
+```
+
+## Eventos
+
+Hoje o único evento em uso é `create_outflow`, enviado a cada saída registrada no
+SGE. O campo `event_type` é livre (até 50 caracteres) e o Notify grava qualquer
+valor que chegar, mas a mensagem de WhatsApp e o template do e-mail são os de
+saída — um evento novo exige ajuste em `webhooks/messages.py` e no template.
+
+## Como apontar o SGE para o Notify
+
+No SGE, a URL base fica em `services/notify.py`:
+
+```python
+self.__base_url = 'http://localhost:8001'
+```
+
+Com o Notify rodando na porta 8001, na mesma máquina do SGE, a configuração atual
+já funciona. Para outro endereço, altere essa URL no SGE.
+
+## Limites e cuidados
+
+- O endpoint não tem autenticação. Rode em rede interna ou proteja com proxy
+  reverso antes de expor na internet.
+- Não há fila nem retentativa. Se o CallMeBot ou o SMTP falhar, a requisição
+  retorna erro e o evento fica apenas se já tiver sido gravado.
+- O histórico fica no SQLite (`db.sqlite3`), na tabela `Webhook`, consultável
+  pelo admin do Django.
+- `DEBUG` está fixo em `True` e o `SECRET_KEY` está escrito em `app/settings.py`.
+  Ajuste os dois antes de rodar fora da rede local.
+
+## Estrutura
+
+```
+app/        settings, urls e wsgi/asgi
+webhooks/   model Webhook, view do endpoint, mensagem e template do e-mail
+services/   client do CallMeBot
+```
+
+## Licença
+
+Repositório pessoal de Marcus Cruz, sem licença declarada.
