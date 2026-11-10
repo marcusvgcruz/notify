@@ -57,6 +57,17 @@ a URL base em `services/notify.py` do SGE (ou aponte pelo proxy da sua rede).
 no `.env.example`; preencha o endereço ao criar o seu `.env`, senão a aplicação
 não sobe.
 
+### Sobre o envio de e-mail
+
+O `app/settings.py` usa o backend de console
+(`django.core.mail.backends.console.EmailBackend`): a mensagem é impressa no
+terminal onde o servidor roda e não sai por SMTP. Para enviar de verdade, troque
+para `django.core.mail.backends.smtp.EmailBackend`; as variáveis `EMAIL_HOST`,
+`EMAIL_PORT`, `EMAIL_HOST_USER` e `EMAIL_HOST_PASSWORD` já estão no `.env`.
+
+No Django 6.1, definir `MAILERS` junto com as variáveis `EMAIL_HOST*` provoca
+`ImproperlyConfigured` na subida — por isso o projeto fica no backend clássico.
+
 ## Endpoint
 
 ```
@@ -117,6 +128,8 @@ já funciona. Para outro endereço, altere essa URL no SGE.
   reverso antes de expor na internet.
 - Não há fila nem retentativa. Se o CallMeBot ou o SMTP falhar, a requisição
   retorna erro e o evento fica apenas se já tiver sido gravado.
+- O e-mail, como está, não sai do servidor: o backend é o de console (veja a
+  seção de configuração).
 - O histórico fica no SQLite (`db.sqlite3`), na tabela `Webhook`, consultável
   pelo admin do Django.
 - `DEBUG` está fixo em `True` e o `SECRET_KEY` está escrito em `app/settings.py`.
