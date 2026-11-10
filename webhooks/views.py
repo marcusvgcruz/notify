@@ -46,7 +46,7 @@ class WebhookOrderView(views.APIView):
             fail_silently=False,
         )
 
-        return self.response.Response(
+        return response.Response(
             data=data,
             status=status.HTTP_200_OK,
         )

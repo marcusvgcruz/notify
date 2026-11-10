@@ -124,12 +124,10 @@ STATIC_URL = 'static/'
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
-
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# Django 6.1 não aceita MAILERS junto com EMAIL_HOST/EMAIL_PORT/EMAIL_HOST_USER/
+# EMAIL_HOST_PASSWORD (lança ImproperlyConfigured). Como a view usa
+# settings.EMAIL_HOST_USER no remetente, mantém-se a configuração clássica.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 CALLMEBOT_API_URL = config('CALLMEBOT_API_URL')
 CALLMEBOT_PHONE_NUMBER = config('CALLMEBOT_PHONE_NUMBER')

@@ -53,8 +53,9 @@ a URL base em `services/notify.py` do SGE (ou aponte pelo proxy da sua rede).
 | `EMAIL_HOST_PASSWORD` | senha dessa conta |
 | `EMAIL_ADMIN_RECEIVER` | quem recebe o e-mail de aviso |
 
-`EMAIL_ADMIN_RECEIVER` é obrigatória, mas não está no `.env.example` — inclua a
-linha ao criar o seu `.env`, senão a aplicação não sobe.
+`EMAIL_ADMIN_RECEIVER` é obrigatória — quem recebe o e-mail de aviso. Ela já vem
+no `.env.example`; preencha o endereço ao criar o seu `.env`, senão a aplicação
+não sobe.
 
 ## Endpoint
 
