@@ -47,7 +47,7 @@ a URL base em `services/notify.py` do SGE (ou aponte pelo proxy da sua rede).
 | `CALLMEBOT_API_URL` | endereço do CallMeBot: `https://api.callmebot.com/whatsapp.php` |
 | `CALLMEBOT_PHONE_NUMBER` | número com DDI e DDD que recebe o WhatsApp |
 | `CALLMEBOT_API_KEY` | chave da API do CallMeBot |
-| `EMAIL_HOST` | servidor SMTP (o exemplo usa `smtp.hostinger.com`) |
+| `EMAIL_HOST` | servidor SMTP do seu provedor de e-mail |
 | `EMAIL_PORT` | porta SMTP (587 no exemplo) |
 | `EMAIL_HOST_USER` | conta que envia o e-mail |
 | `EMAIL_HOST_PASSWORD` | senha dessa conta |

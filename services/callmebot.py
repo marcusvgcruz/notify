@@ -11,6 +11,7 @@ class CallMeBot:
 
     def send_message(self, message):
         response = requests.get(
-            url=f'{self.__base_url}?phone={self.__phone_number}&text={message}&apikey={self.__api_key}'
+            url=f'{self.__base_url}?phone={self.__phone_number}&text={message}&apikey={self.__api_key}',
+            timeout=10,
         )
         return response.text

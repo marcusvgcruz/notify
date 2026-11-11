@@ -130,7 +130,7 @@ STATIC_URL = 'static/'
 # settings.EMAIL_HOST_USER no remetente, mantém-se a configuração clássica.
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-CALLMEBOT_API_URL = config('CALLMEBOT_API_URL')
+CALLMEBOT_API_URL = config('CALLMEBOT_API_URL', default='')
 CALLMEBOT_PHONE_NUMBER = config('CALLMEBOT_PHONE_NUMBER')
 CALLMEBOT_API_KEY = config('CALLMEBOT_API_KEY')
 
