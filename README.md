@@ -52,6 +52,9 @@ a URL base em `services/notify.py` do SGE (ou aponte pelo proxy da sua rede).
 | `EMAIL_HOST_USER` | conta que envia o e-mail |
 | `EMAIL_HOST_PASSWORD` | senha dessa conta |
 | `EMAIL_ADMIN_RECEIVER` | quem recebe o e-mail de aviso |
+| `SECRET_KEY` | chave de segurança do Django (obrigatória; gere uma nova, não reutilize a de outro projeto) |
+| `DEBUG` | `True`/`False` — default `False` (seguro para produção) |
+| `ALLOWED_HOSTS` | hosts permitidos, separados por vírgula — default `localhost,127.0.0.1` |
 
 `EMAIL_ADMIN_RECEIVER` é obrigatória — quem recebe o e-mail de aviso. Ela já vem
 no `.env.example`; preencha o endereço ao criar o seu `.env`, senão a aplicação
@@ -132,8 +135,10 @@ já funciona. Para outro endereço, altere essa URL no SGE.
   seção de configuração).
 - O histórico fica no SQLite (`db.sqlite3`), na tabela `Webhook`, consultável
   pelo admin do Django.
-- `DEBUG` está fixo em `True` e o `SECRET_KEY` está escrito em `app/settings.py`.
-  Ajuste os dois antes de rodar fora da rede local.
+- `SECRET_KEY`, `DEBUG` e `ALLOWED_HOSTS` vêm do `.env` (veja a tabela acima);
+  `DEBUG` e `ALLOWED_HOSTS` têm defaults seguros (`False` e `localhost,127.0.0.1`),
+  mas a `SECRET_KEY` é obrigatória — sem ela a aplicação não sobe. Nunca
+  commite o `.env`.
 
 ## Estrutura
 
